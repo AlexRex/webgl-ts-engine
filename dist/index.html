@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Técnicas avanzadas de gráficos</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/highlight.css">
+</head>
+
+<body>
+  <h1>Técnicas Avanzadas de Gráficos</h1>
+  <p>
+    En el siguiente documento se muestran y detallan los entregables propuestos para la asignatura Técnicas Avanzadas de Gráficos. La gran mayoría ya han sido
+    entregados por lo que se ha optado por nombrarlos pero no crear un entregable propio.
+  </p>
+  <ol>
+    <li><a href="#tree">Árbol de la Escena</a></li>
+
+    <li>
+      <a href="#vis">Visualización</a>
+      <ul>
+        <li><a href="#phongsect">Shader Básico: Phong + Blinn</a></li>
+        <li><a href="#specularsect">Shader Avanzado: Mapa de luces, luz especular</a></li>
+        <li><a href="#normalssect">Shader Avanzado: Mapa de normales</a></li>
+        <li><a href="#specnormsect">Shader Avanzado: Mapa de normales + Mapa de luces</a></li>
+        <li><a href="#blendingsect">Shader Avanzado: Transparencias</a></li>
+        <li><a href="#toonsect">Shader Avanzado: Cartoon</a></li>
+      </ul>
+    </li>
+
+    <li>
+      <a href="#gestor">Gestor de recursos</a>
+    </li>
+
+    <li>
+      <a href="#fachada">Fachada</a>
+    </li>
+
+    <!-- <li>
+      <a href="#app">Aplicación</a>
+    </li> -->
+    <li>
+      <a href="#otros">Otros</a>
+      <ul>
+        <li><a href="#optimizaciones">Optimizaciones del motor</a></li>
+        <li><a href="#extras">Extras</a></li>
+      </ul>
+    </li>
+  </ol>
+
+  <section class="sect">
+    <h2 id="tree">1. Árbol de la Escena</h2>
+    <p>
+      Se ha desarrollado completamente el árbol de la escena: nodos, entidades, transformaciones, cámaras, luces, mallas y animaciones.
+      <br><br>
+      <b>Entregables englobados</b>: 4, 5, 6, 7 y 8.
+    </p>
+  </section>
+  <section class="sect">
+    <h2 id="vis">2. Visualización</h2>
+    <p>
+      Shader Básico de las entidades tipo malla. Implementación junto con cámaras, luces y texturas. Se hace un registro de las cámaras y luces para pintarlas en el orden correcto.
+      <br><br>
+      <b>Entregables englobados</b>: 1, 3, 10, 11, 13 y 15.
+    </p>
+    <canvas class="canvas" id="basic"></canvas>
+    <div class="canvas-caption">
+      <sub>Click con el ratón para rotar.</sub>
+    </div>
+    <section id="phongsect">
+      <h3>Shader Básico: Phong + Blinn</h3>
+        <p>
+          Se ha optimizado el shader de Phong implementado en el entregable anterior. Además se ha añadido Blinn al modelo para conseguir mejores luces especulares.
+          <br><br>
+          Destacar el fragmento de código donde se implementa <i>Blinn</i>.
+        </p>
+        <pre>
+          <code class="lang-glsl">
+        // Blinn
+        vec3 viewDir = normalize(E - vVertex.xyz);
+        vec3 halfwayDir = normalize(lightDir + viewDir);
+
+        vec3 reflection = reflect(normal, halfwayDir);
+        specular = pow(max(dot(reflection, E), 0.0), uShininess);
+        Is += uLight.uLightSpecular * uMaterialSpecular * specular;
+          </code>
+        </pre>
+
+        <canvas class="canvas" id="phong"></canvas>
+        <div class="canvas-caption">
+          <sub>Click con el ratón para rotar.</sub>
+        </div>
+    </section>
+
+    <section id="specularsect">
+      <h3>Shader Avanzado: Mapa de luces, luz especular</h3>
+      <p>
+        En el siguiente shader, se usan mapas de luz para definir las partes del modelo donde se producen los reflejos especulares.
+      </p>
+
+      <div class="img-container">
+        <div class="img">
+          <img src="assets/models/square/square.png" alt="square-texture">
+          <figcaption>Textura</figcaption>
+        </div>
+        <div class="img">
+          <img src="assets/models/square/specular.png" alt="specular-texture">
+          <figcaption>Mapa de luces</figcaption>
+        </div>
+      </div>
+      <pre>
+        <code class="lang-glsl">
+      float shininess = texture2D(uSpecularMapSampler, vec2(vTextureCoord.s, vTextureCoord.t)).r * 255.0;
+
+      vec3 reflection = reflect(normal, -lightDir);
+      specular = pow(max(dot(reflection, E), 0.0), shininess);
+      Is += uLights[i].uLightSpecular * uMaterialSpecular * specular;
+        </code>
+      </pre>
+      <canvas class="canvas" id="specularmaps"></canvas>
+      <div class="canvas-caption">
+        <sub>Click con el ratón para rotar.</sub>
+      </div>
+    </section>
+    <section id="normalssect">
+      <h3>Shader Avanzado: Mapa de normales</h3>
+      <p>
+        Al igual que como hemos hecho con los mapas especulares, en este caso usamos otro mapa para definir las normales del modelo. De esta forma
+        conseguimos simular un efecto 3D cuando vemos el objeto de frente.
+      </p>
+
+      <div class="img-container">
+        <div class="img">
+          <img src="assets/models/blue-rock/diffuse.png" alt="blue-rock-texture">
+          <figcaption>Textura</figcaption>
+        </div>
+        <div class="img">
+          <img src="assets/models/blue-rock/normal.png" alt="normal-texture">
+          <figcaption>Mapa de normales</figcaption>
+        </div>
+      </div>
+      <pre>
+        <code class="lang-glsl">
+      vec3 NormalMap = texture2D(uNormalMapSampler, vTextureCoord).rgb;
+
+      // Normal al vertice
+      vec3 normal = normalize(NormalMap * 2.0 - 0.5);
+        </code>
+      </pre>
+      <canvas class="canvas" id="normalmaps"></canvas>
+      <div class="canvas-caption">
+        <sub>Click con el ratón para rotar.</sub>
+      </div>
+    </section>
+
+    <section id="specnormsect">
+      <h3>Shader Avanzado: Mapa de normales + Mapa de luces</h3>
+      <p>
+        Finalmente, podemos unir los dos shaders anteriores para conseguir un efecto todavía mejor.
+      </p>
+
+      <div class="img-container">
+        <div class="img">
+          <img src="assets/models/blue-rock/diffuse.png" alt="blue-rock-texture">
+          <figcaption>Textura</figcaption>
+        </div>
+        <div class="img">
+          <img src="assets/models/blue-rock/normal.png" alt="normal-texture">
+          <figcaption>Mapa de normales</figcaption>
+        </div>
+        <div class="img">
+          <img src="assets/models/blue-rock/specular.png" alt="specular-texture">
+          <figcaption>Mapa de luces</figcaption>
+        </div>
+      </div>
+      <pre>
+        <code class="lang-glsl">
+      vec3 NormalMap = texture2D(uNormalMapSampler, vTextureCoord).rgb;
+
+      // Normal al vertice
+      vec3 normal = normalize(NormalMap * 2.0 - 0.5);
+
+      float shininess = texture2D(uSpecularMapSampler, vec2(vTextureCoord.s, vTextureCoord.t)).r * 255.0;
+        </code>
+      </pre>
+      <canvas class="canvas" id="specularnormal"></canvas>
+      <div class="canvas-caption">
+        <sub>Click con el ratón para rotar.</sub>
+      </div>
+    </section>
+
+    <section id="blendingsect">
+      <h3>Shader Avanzado: Transparencias</h3>
+      <p>
+        Para crear transparencias, leemos la textura en el fragment shader y descartamos aquellos fragmentos en los que
+        la componente <i>alpha</i> de la textura sea menor a un umbral.
+      </p>
+
+      <div class="img-container">
+        <div class="img">
+          <img src="assets/models/window-blending/diffuse.png" alt="window-texture">
+          <figcaption>Textura ventana</figcaption>
+        </div>
+        <div class="img">
+          <img src="assets/models/tree-blending/diffuse.png" alt="tree-texture">
+          <figcaption>Textura árbol</figcaption>
+        </div>
+      </div>
+      <pre>
+        <code class="lang-glsl">
+      vec4 texColor = texture2D(uTexture, vTextureCoord);
+
+      if (texColor.a < .9) {
+        discard;
+      }
+
+      gl_FragColor = texColor;
+        </code>
+      </pre>
+      <canvas class="canvas" id="blending"></canvas>
+      <div class="canvas-caption">
+        <sub>Click con el ratón para rotar.</sub>
+      </div>
+    </section>
+
+    <section id="toonsect">
+      <h3>Shader Avanzado: <i>Cartoon</i></h3>
+      <p>
+        La curiosidad de este shader, y el truco reside en definir un número de zonas de intensidad y dividir el objeto, usando umbrales, en estas zonas.
+        La intensidad se calcula de forma similar a la componente lambertiana del modelo de <i>Phong</i>.
+      </p>
+      <pre>
+        <code class="lang-glsl">
+      float intensity;
+
+      intensity = dot(vec3(uLights[0].uLightPosition), normal);
+
+      if (intensity > 20.0) {
+        Id.xyz = uMaterialDiffuse.xyz;
+      } else if (intensity > 15.0) {
+        Id.xyz = uMaterialDiffuse.xyz * vec3(0.6, 0.6, 0.6);
+      } else if (intensity > 5.0) {
+        Id.xyz = uMaterialDiffuse.xyz * vec3(0.4, 0.4, 0.4);
+      } else {
+        Id.xyz = uMaterialDiffuse.xyz * vec3(0.2, 0.2, 0.2);
+      }
+        </code>
+      </pre>
+      <canvas class="canvas" id="toon"></canvas>
+      <div class="canvas-caption">
+        <sub>Click con el ratón para rotar.</sub>
+      </div>
+    </section>
+
+  </section>
+
+  <section class="sect">
+    <h2 id="gestor">3. Gestor de recursos</h2>
+    <p>
+      Se ha implementado un gestor de recursos junto con el recurso de tipo malla. Se <i>parsean</i> los objetos de tipo <i>obj y mtl (wavefront)</i>. Permite animaciones, materiales y texturas.
+      <pre>
+        <code class="lang-js">
+      /**
+       * Obtiene un recurso. Si esta disponible lo devuelve, si no, crea uno nuevo.
+       * @param {string} resourceType Tipo de recurso (mesh, light, etc).
+       * @param {Object} texturePaths ruta de las texturas
+       * @param {number} nOfModels numero de modelos (animaciones)
+       * @return {Promise<Resource>} Promesa
+       */
+      public getResource(resourceType: string, texturePaths: any, nOfModels?: number): Promise<Resource> {
+        return new Promise((resolve, reject) => {
+          let resourceToFind = _.find(this.resources, (resource) => {
+            return resource.id === texturePaths.basePath;
+          });
+
+          if (!resourceToFind) {
+            resourceToFind = this.createNewResourceType(resourceType, texturePaths, nOfModels);
+            this.resources.push(resourceToFind);
+
+            resourceToFind.loadFile()
+            .then((data) => {
+              resolve(resourceToFind);
+            });
+          } else if (resourceToFind.loaded) {
+            resolve(resourceToFind);
+          }
+        });
+      }
+        </code>
+      </pre>
+      <br><br>
+      <b>Entregables englobados</b>: 2, 9 y 12.
+    </p>
+    <canvas class="canvas" id="animation"></canvas>
+    <div class="canvas-caption">
+      <sub>Click con el ratón para rotar.</sub>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2 id="fachada">4. Fachada</h2>
+    <p>
+      Se ha implementado una fachada para hacer uso de las funciones del motor sin recurrir a este internamente.
+      <pre>
+        <code class="lang-js">
+      this.motor = new TRCMotor(canvasId);
+      this.scene = this.motor.createScene('escena');
+
+      this.camRotationTransfX = this.motor.createTransform(this.scene, 'cameraRotTransfX');
+      this.camRotationTransfY = this.motor.createTransform(this.camRotationTransfX, 'cameraRotTransfY');
+      this.camTranslationTransf = this.motor.createTransform(this.camRotationTransfY, 'cameraTransTransf');
+      this.camera = this.motor.createCamera(this.camTranslationTransf, 'camera');
+
+      this.motor.setShader(shader);
+      this.motor.start();
+        </code>
+      </pre>
+      <br><br>
+      <b>Entregables englobados</b>: 14.
+    </p>
+  </section>
+
+  <!-- <section class="sect">
+    <h2 id="app">5. Aplicación</h2>
+    <p>
+      Para la integración con la aplicación principal, hemos decidido usar el motor para que los usuarios que no dispongan de una imagen
+      de perfil puedan crear un avatar en 3D.
+      <br><br>
+      <b>Entregables englobados</b>: 16.
+      <br><br>
+      <iframe class="app" src="/app.html" frameborder="0"></iframe>
+    </p>
+  </section> -->
+
+  <section class="sect">
+    <h2 id="otros">5. Otros</h2>
+    <p>
+      Otros detalles del motor.
+      <br><br>
+      <b>Entregables englobados</b>: 17, 18 y 19.
+    </p>
+
+    <section id="optimizaciones">
+      <h3>Optimizaciones</h3>
+      <p>En cuanto a optimizaciones, a parte de las que se han ido implementando en los shaders, también se ha hecho uso de <i>culling y backface culling</i>.</p>
+    </section>
+
+    <section id="extras">
+      <h3>Extras</h3>
+      <p>Como extras destacar todo el modelado de las mallas y procesado de las texturas en los modelos de la aplicación,
+        así como los de varias demostraciones presentadas en este documento.
+      </p>
+    </section>
+  </section>
+
+  <script type="text/javascript" src="assets/js/GlslCanvas.js"></script>
+  <script type="text/javascript" src="assets/js/stats.min.js"></script>
+  <script type="text/javascript" src="assets/js/highlight.js"></script>
+
+  <script src="/main.bundle.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script>
+    new TRCApp.Main();
+  </script>
+</body>
+</html>
