@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>TAG - Aplicación</title>
+
+  <style>
+    body,
+    html {
+      margin: 0 auto;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Verdana, sans-serif;
+      color: #333;
+    }
+
+    h4, h5 {
+      margin: 0;
+    }
+
+    .canvas {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      cursor: default;
+    }
+
+    .menu {
+      padding: 20px 20px;
+      position: absolute;
+      color: white;
+      background-color: rgba(230, 126, 34, .8);
+      width: calc(100% - 40px);
+      height: 100px;
+    }
+
+    .forms {
+      display: flex;
+    }
+
+    form {
+      margin: 1em;
+    }
+
+    a {
+      box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+      padding: 8px;
+      background-color: #27ae60;
+      border-radius: 4px;
+    }
+    a:hover {
+      opacity: 0.8;
+      cursor: pointer;
+    }
+
+    a:focus, a:active, a:visited, a:-webkit-any-link {
+      color: white;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="menu">
+    <div class="forms">
+      <form name="gorraColor">
+        <h5>Gorra: </h5>
+        <select id="gorraColor">
+          <option value="disable" checked>Desactivado
+          <option value="naranja.png">Naranja
+          <option value="azul.png">Azul
+          <option value="verde.png">Verde
+        </select>
+      </form>
+
+      <form name="gafasColor">
+        <h5>Gafas: </h5>
+        <select id="gafasColor">
+          <option value="disable" checked>Desactivado
+          <option value="negras.png">Negras
+          <option value="grises.png">Grises
+          <option value="blancas.png">Blancas
+        </select>
+      </form>
+
+      <form name="cabezaColor">
+        <h5>Cabeza: </h5>
+        <select id="cabezaColor">
+          <option value="roja.png" checked>Roja
+          <option value="amarilla.png">Amarilla
+          <option value="gris.png">Gris
+        </select>
+      </form>
+
+      <form name="cuerpoColor">
+        <h5>Cuerpo: </h5>
+        <select id="cuerpoColor">
+          <option value="marron.png" checked>Marron
+          <option value="rojo.png">Rojo
+          <option value="amarillo.png">Amarillo
+          <option value="gris.png">Gris
+        </select>
+      </form>
+
+      <form name="alasColor">
+        <h5>Alas: </h5>
+        <select id="alasColor">
+          <option value="rojas.png" checked>Rojas
+          <option value="amarillas.png">Amarillas
+          <option value="azules.png">Azules
+          <option value="morado.png">Moradas
+        </select>
+      </form>
+      <form name="bg-color">
+        <h5>Fondo: </h5>
+        <input type="color" name="bg-color" id="bg-color" value="#ffffff">
+      </form>
+      <form>
+        <!-- <a id="download">Enviar</a> -->
+      </form>
+    </div>
+  </div>
+  <canvas class="canvas" id="app"></canvas>
+
+  <script type="text/javascript" src="assets/js/GlslCanvas.js"></script>
+  <script type="text/javascript" src="assets/js/stats.min.js"></script>
+
+  <script src="/main.bundle.js"></script>
+
+  <script>
+    new TRCApp.Application();
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Blender MTL File: 'v-ray-torus.blend'
+# Material Count: 1
+
+newmtl Material
+Ns 96.078431
+Ka 0.3 0.3 0.3
+Kd 0.2 0.3 0.640000
+Ks 0.500000 0.500000 0.500000
+illum 2
+map_Kd /Users/aletormat/Dev/truequealo/motor-tag-ts/src/assets/models/sphere/sphere.png

@@ -1,0 +1,12 @@
+# Blender MTL File: 'Ancient Vase.blend'
+# Material Count: 1
+
+newmtl Ancient_Vase
+Ns 5.078431
+Ka 0.800000 0.800000 0.800000
+Kd 0.900000 0.900000 0.900000
+Ks 0.900000 0.900000 0.900000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd vase.tga
