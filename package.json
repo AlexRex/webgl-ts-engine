@@ -9,7 +9,7 @@
     "test": "karma start karma.config.js"
   },
   "author": "The Red Chicken",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/jasmine": "2.5.40",
     "@types/node": "7.0.0",
